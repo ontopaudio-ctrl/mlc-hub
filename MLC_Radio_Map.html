@@ -1,613 +1,1035 @@
-
-```html
+xml
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MLC Networks Hub - Radio Contact & Market Intelligence</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background: #0a0c14; color: #fff; min-height: 100vh; }
+  <meta charset="UTF-8" />
+  <title>MLC Radio Map · Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #111827;
+      --accent-blue: #3b82f6;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-yellow: #eab308;
+      --accent-red: #ef4444;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+    }
 
-/* HEADER */
-.header { background: linear-gradient(135deg, #0f121c, #1a1f2d); padding: 20px 30px; border-bottom: 3px solid #ff3366; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
-.logo-area { display: flex; align-items: center; gap: 25px; }
-.mlc-brand { display: flex; align-items: center; gap: 10px; }
-.mlc-brand h1 { font-size: 2.2em; font-weight: 800; background: linear-gradient(135deg, #ff3366, #ff6b4a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; }
-.mlc-brand span { color: #8892b0; font-weight: 400; font-size: 1.1em; }
-.subtitle { color: #a0a8c0; font-size: 0.85em; letter-spacing: 1px; border-left: 2px solid #ff3366; padding-left: 15px; }
-.header-stats { display: flex; gap: 25px; flex-wrap: wrap; }
-.stat-item { text-align: center; }
-.stat-number { font-size: 1.8em; font-weight: 800; color: #ff3366; }
-.stat-label { font-size: 0.7em; color: #8892b0; text-transform: uppercase; letter-spacing: 1px; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* USER INFO */
-.user-info { background: #1a1f2d; padding: 12px 25px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #2a3040; }
-.user-details { display: flex; align-items: center; gap: 20px; }
-.user-name { font-weight: 700; color: #ff3366; }
-.user-title { color: #8892b0; font-size: 0.85em; }
-.user-contact { color: #a0a8c0; font-size: 0.85em; display: flex; gap: 20px; }
-.user-contact i { color: #ff3366; margin-right: 5px; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0b1220 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px;
+    }
 
-/* NAV */
-.nav { background: #0f121c; padding: 0 30px; display: flex; gap: 5px; border-bottom: 1px solid #2a3040; overflow-x: auto; }
-.nav-btn { padding: 16px 24px; background: none; border: none; color: #8892b0; cursor: pointer; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 3px solid transparent; transition: all 0.3s; white-space: nowrap; }
-.nav-btn:hover { color: #ff3366; }
-.nav-btn.active { color: #ff3366; border-bottom-color: #ff3366; }
+    h1, h2, h3, h4 {
+      letter-spacing: 0.02em;
+    }
 
-/* MAIN */
-.main { padding: 25px 30px; }
-.section { display: none; }
-.section.active { display: block; }
+    .app-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 24px;
+    }
 
-/* SEARCH SECTION */
-.search-section { background: #0f121c; border: 1px solid #2a3040; border-radius: 12px; padding: 20px; margin-bottom: 25px; }
-.search-title { font-size: 1.1em; color: #ff3366; margin-bottom: 15px; font-weight: 600; }
-.search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-.search-input { flex: 1; padding: 14px 18px; background: #1a1f2d; border: 1px solid #2a3040; border-radius: 8px; color: #fff; font-size: 1em; }
-.search-input:focus { outline: none; border-color: #ff3366; }
-.search-input::placeholder { color: #4a5168; }
-.search-btn { padding: 14px 30px; background: #ff3366; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.3s; }
-.search-btn:hover { background: #ff1a4f; transform: translateY(-2px); }
+    @media (max-width: 960px) {
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
 
-/* FILTER TABS */
-.filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-.filter-tab { padding: 10px 20px; background: #1a1f2d; border: 1px solid #2a3040; border-radius: 25px; color: #8892b0; cursor: pointer; font-size: 0.85em; font-weight: 600; transition: all 0.3s; }
-.filter-tab:hover { border-color: #ff3366; color: #ff3366; }
-.filter-tab.active { background: #ff3366; border-color: #ff3366; color: #fff; }
-.filter-tab.alex.active { background: #00d4ff; border-color: #00d4ff; }
-.filter-tab.jimena.active { background: #ff3366; border-color: #ff3366; }
-.filter-tab.myriam.active { background: #b829ff; border-color: #b829ff; }
-.filter-tab.jefes.active { background: #ffaa00; border-color: #ffaa00; }
+    header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
 
-/* RESULTS COUNT */
-.results-count { color: #8892b0; font-size: 0.9em; margin-bottom: 15px; }
-.results-count span { color: #ff3366; font-weight: 700; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-/* STATIONS GRID */
-.stations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
-.station-card { background: linear-gradient(135deg, #0f121c, #1a1f2d); border: 1px solid #2a3040; border-radius: 12px; padding: 20px; transition: all 0.3s; }
-.station-card:hover { border-color: #ff3366; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,51,102,0.2); }
-.station-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
-.station-call { font-size: 1.3em; font-weight: 800; color: #fff; }
-.station-band { color: #ff3366; font-size: 0.8em; margin-left: 5px; }
-.station-location { color: #8892b0; font-size: 0.85em; margin-bottom: 12px; }
-.station-location i { color: #ff3366; margin-right: 5px; }
-.station-contact { padding: 12px 0; border-top: 1px solid #2a3040; border-bottom: 1px solid #2a3040; margin-bottom: 12px; }
-.contact-name { font-weight: 700; color: #fff; }
-.contact-role { font-size: 0.75em; color: #ff3366; }
-.station-badges { display: flex; gap: 8px; flex-wrap: wrap; }
-.badge { padding: 4px 12px; border-radius: 20px; font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-.badge-jimena { background: rgba(255,51,102,0.2); color: #ff6b7c; border: 1px solid #ff3366; }
-.badge-myriam { background: rgba(184,41,255,0.2); color: #c084fc; border: 1px solid #b829ff; }
-.badge-jefes { background: rgba(255,170,0,0.2); color: #ffc107; border: 1px solid #ffaa00; }
-.badge-alex { background: rgba(0,212,255,0.2); color: #7ed6ff; border: 1px solid #00d4ff; }
-.badge-tunes { background: rgba(255,51,102,0.2); color: #ff6b7c; border: 1px solid #ff3366; }
-.badge-studio { background: rgba(255,51,102,0.2); color: #ff6b7c; border: 1px solid #ff3366; }
-.badge-afiliada { background: rgba(0,200,0,0.2); color: #6fcf97; border: 1px solid #27ae60; }
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #22c55e, #15803d);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+    }
 
-/* SHOWS SECTION */
-.shows-section { background: #0f121c; border: 1px solid #2a3040; border-radius: 12px; padding: 20px; margin-top: 25px; }
-.shows-title { color: #ff3366; font-size: 1.1em; margin-bottom: 15px; font-weight: 600; }
-.shows-list { display: flex; gap: 15px; flex-wrap: wrap; }
-.show-item { padding: 10px 20px; background: #1a1f2d; border: 1px solid #2a3040; border-radius: 25px; color: #fff; font-size: 0.9em; cursor: pointer; transition: all 0.3s; }
-.show-item:hover { border-color: #ff3366; transform: translateY(-2px); }
-.show-item.alex:hover { border-color: #00d4ff; }
-.show-item.jimena:hover { border-color: #ff3366; }
-.show-item.myriam:hover { border-color: #b829ff; }
-.show-item.jefes:hover { border-color: #ffaa00; }
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-/* MAPA USA SECTION */
-.map-section { margin-bottom: 25px; }
-.map-placeholder { background: linear-gradient(135deg, #0f121c, #1a1f2d); border: 1px solid #2a3040; border-radius: 12px; padding: 40px; text-align: center; color: #4a5168; font-size: 1.2em; border: 2px dashed #2a3040; }
+    .title {
+      font-size: clamp(22px, 3vw, 26px);
+      font-weight: 600;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .header { flex-direction: column; text-align: center; }
-  .logo-area { flex-direction: column; }
-  .user-info { flex-direction: column; gap: 10px; text-align: center; }
-  .user-contact { flex-direction: column; gap: 5px; }
-  .search-box { flex-direction: column; }
-}
-</style>
+    .title span.icon {
+      font-size: 22px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 55%),
+                  radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 60%),
+                  #020617;
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(15, 23, 42, 1);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, rgba(148, 163, 184, 0.2), transparent);
+      mix-blend-mode: screen;
+      opacity: 0.14;
+      pointer-events: none;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title span.icon {
+      font-size: 16px;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 720px) {
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .stat-pill {
+      border-radius: var(--radius-md);
+      padding: 10px 10px 8px;
+      background: radial-gradient(circle at top, rgba(15, 118, 110, 0.4), transparent 60%),
+                  rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-pill span.label {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .stat-pill span.value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .stat-pill span.caption {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text-muted);
+    }
+
+    .status-chip .led {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+    }
+
+    .led-live {
+      background: radial-gradient(circle at 30% 30%, #f97316, #b91c1c);
+      box-shadow: 0 0 12px rgba(248, 113, 22, 0.9);
+    }
+
+    .led-pending {
+      background: radial-gradient(circle at 30% 30%, #facc15, #ca8a04);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.9);
+    }
+
+    .shows-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .shows-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shows-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .show-card {
+      border-radius: var(--radius-md);
+      padding: 12px 12px 10px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.2), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .show-card.ja {
+      border-color: rgba(59, 130, 246, 0.9);
+    }
+
+    .show-card.mr {
+      border-color: rgba(168, 85, 247, 0.9);
+      background: radial-gradient(circle at top, rgba(168, 85, 247, 0.2), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+    }
+
+    .show-card.cb {
+      border-color: rgba(234, 179, 8, 0.9);
+      background: radial-gradient(circle at top, rgba(234, 179, 8, 0.22), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+    }
+
+    .show-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #f9fafb;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(59, 130, 246, 0.4));
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.6);
+      flex-shrink: 0;
+    }
+
+    .show-card.mr .show-badge {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(236, 72, 153, 0.7));
+      box-shadow: 0 10px 20px rgba(168, 85, 247, 0.7);
+    }
+
+    .show-card.cb .show-badge {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(248, 250, 252, 0.85));
+      color: #111827;
+      box-shadow: 0 10px 22px rgba(234, 179, 8, 0.7);
+    }
+
+    .show-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .show-title-block h3 {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .show-title-block p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .show-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .pill-small {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .pill-number {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .pill-number span.n {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .pill-number span.label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(239, 68, 68, 0.6);
+      color: #fecaca;
+      background: rgba(127, 29, 29, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-status span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #f97316, #b91c1c);
+      box-shadow: 0 0 12px rgba(248, 113, 22, 0.9);
+    }
+
+    .badge-status.pending {
+      border-color: rgba(234, 179, 8, 0.7);
+      background: rgba(113, 63, 18, 0.9);
+      color: #fef9c3;
+    }
+
+    .mini-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #e5e7eb;
+    }
+
+    .table-wrapper {
+      border-radius: 12px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top, rgba(30, 64, 175, 0.5), transparent 60%),
+                  rgba(15, 23, 42, 0.98);
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 5px 6px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    th {
+      color: #9ca3af;
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-soft {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+    }
+
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .services-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .service-card {
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+      background: radial-gradient(circle at top, rgba(22, 163, 74, 0.25), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .service-card.secondary {
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.23), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+      border-color: rgba(59, 130, 246, 0.7);
+    }
+
+    .service-card.yellow {
+      background: radial-gradient(circle at top, rgba(234, 179, 8, 0.23), transparent 65%),
+                  rgba(15, 23, 42, 0.98);
+      border-color: rgba(234, 179, 8, 0.8);
+    }
+
+    .service-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .service-value {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .badge-ghost {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .alert-item {
+      border-radius: 12px;
+      padding: 9px 10px 8px;
+      background: radial-gradient(circle at left, rgba(220, 38, 38, 0.25), transparent 60%),
+                  rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(239, 68, 68, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .alert-item.ok {
+      background: radial-gradient(circle at left, rgba(22, 163, 74, 0.25), transparent 60%),
+                  rgba(15, 23, 42, 0.96);
+      border-color: rgba(34, 197, 94, 0.75);
+    }
+
+    .alert-item.pending {
+      background: radial-gradient(circle at left, rgba(234, 179, 8, 0.3), transparent 60%),
+                  rgba(15, 23, 42, 0.96);
+      border-color: rgba(234, 179, 8, 0.8);
+    }
+
+    .alert-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .alert-tag {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .alert-body {
+      color: var(--text-muted);
+    }
+
+    .alert-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .alert-status {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: var(--text-muted);
+    }
+
+    .alert-meta small {
+      font-size: 10px;
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    .map-placeholder {
+      height: 210px;
+      border-radius: 12px;
+      border: 1px dashed rgba(75, 85, 99, 0.9);
+      background: radial-gradient(circle at top, rgba(30, 64, 175, 0.4), transparent 60%),
+                  rgba(15, 23, 42, 0.98);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-placeholder span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .map-placeholder::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.26), transparent 50%),
+        radial-gradient(circle at 80% 30%, rgba(59, 130, 246, 0.23), transparent 55%),
+        radial-gradient(circle at 30% 80%, rgba(6, 182, 212, 0.25), transparent 55%);
+      opacity: 0.8;
+      mix-blend-mode: screen;
+    }
+
+    .map-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #facc15;
+      box-shadow: 0 0 14px rgba(250, 204, 21, 0.9);
+      position: absolute;
+      opacity: 0.9;
+    }
+
+    .map-dot.blue {
+      background: #60a5fa;
+      box-shadow: 0 0 14px rgba(96, 165, 250, 0.9);
+    }
+
+    .checkbox-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .checkbox-row input {
+      accent-color: #22c55e;
+    }
+  </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="header">
-  <div class="logo-area">
-    <div class="mlc-brand">
-      <h1>MLC</h1>
-      <span>MEDIA</span>
-    </div>
-    <div class="subtitle">NETWORK HUB<br>RADIO CONTACT & MARKET INTELLIGENCE</div>
-  </div>
-  <div class="header-stats">
-    <div class="stat-item">
-      <div class="stat-number">502</div>
-      <div class="stat-label">ESTACIONES</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number">290</div>
-      <div class="stat-label">CONTACTS</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number">171</div>
-      <div class="stat-label">MERCADOS</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-number">900+</div>
-      <div class="stat-label">RED MLC</div>
-    </div>
-  </div>
-</div>
-
-<!-- USER INFO -->
-<div class="user-info">
-  <div class="user-details">
-    <span class="user-name">David Bello</span>
-    <span class="user-title">CHIEF NETWORK OFFICER</span>
-  </div>
-  <div class="user-contact">
-    <span><i>✉️</i> David@MLCRadio.com</span>
-    <span><i>📞</i> 404.547.4007</span>
-  </div>
-</div>
-
-<!-- NAV -->
-<div class="nav">
-  <button class="nav-btn active" onclick="showSection('dashboard', this)">📊 DASHBOARD</button>
-  <button class="nav-btn" onclick="showSection('mapa', this)">🗺️ MAPA USA</button>
-  <button class="nav-btn" onclick="showSection('contactos', this)">📇 CONTACTOS</button>
-  <button class="nav-btn" onclick="showSection('shows', this)">🎙️ SHOWS</button>
-  <button class="nav-btn" onclick="showSection('studio', this)">🎬 STUDIO CENTER</button>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<!-- ========== DASHBOARD SECTION ========== -->
-<div id="dashboard" class="section active">
-
-  <!-- MAPA USA Preview -->
-  <div class="map-section">
-    <div class="map-placeholder">
-      🗺️ MAPA INTERACTIVO USA<br>
-      <small style="color:#4a5168;">502 estaciones en 171 mercados</small>
-    </div>
-  </div>
-
-  <!-- BÚSQUEDA UNIVERSAL -->
-  <div class="search-section">
-    <div class="search-title">🔍 BÚSQUEDA UNIVERSAL</div>
-    <div class="search-box">
-      <input type="text" class="search-input" placeholder="Call, mercado, PD, owner, show..." id="universalSearch" onkeyup="universalSearch()">
-      <button class="search-btn" onclick="universalSearch()">BUSCAR</button>
-    </div>
-    <div class="results-count" id="searchResultsCount">Mostrando <span>502</span> estaciones</div>
-  </div>
-
-  <!-- FILTER TABS -->
-  <div class="filter-tabs">
-    <button class="filter-tab active" onclick="filterStations('all', this)">TODOS</button>
-    <button class="filter-tab alex" onclick="filterStations('alex', this)">ALEX LUCAS</button>
-    <button class="filter-tab" onclick="filterStations('studio', this)">STUDIO</button>
-    <button class="filter-tab" onclick="filterStations('tunes', this)">TUNES</button>
-    <button class="filter-tab jimena" onclick="filterStations('jimena', this)">JIMENA</button>
-    <button class="filter-tab myriam" onclick="filterStations('myriam', this)">MYRIAM & ROCÍO</button>
-    <button class="filter-tab jefes" onclick="filterStations('jefes', this)">LOS JEFES</button>
-  </div>
-
-  <!-- STATIONS GRID -->
-  <div class="stations-grid" id="stationsGrid"></div>
-
-  <!-- SHOWS SECTION -->
-  <div class="shows-section">
-    <div class="shows-title">🎙️ SHOWS EN RED</div>
-    <div class="shows-list">
-      <span class="show-item alex">Alex Lucas Show</span>
-      <span class="show-item jimena">Jimena Aguilar en Vivo</span>
-      <span class="show-item myriam">Myriam y Rocío Show</span>
-      <span class="show-item jefes">Los Jefes</span>
-      <span class="show-item">MLC Studio Center</span>
-      <span class="show-item">MLC Tunes</span>
-      <span class="show-item">Afiliada MLC</span>
-    </div>
-  </div>
-</div>
-
-<!-- ========== MAPA USA SECTION ========== -->
-<div id="mapa" class="section">
-  <div class="search-section">
-    <div class="search-title">🗺️ MAPA INTERACTIVO USA</div>
-    <div class="map-placeholder" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
-      🗺️ Aquí irá el mapa interactivo con las 502 estaciones<br>
-      <small>Próximamente: Visualización geográfica en tiempo real</small>
-    </div>
-  </div>
-</div>
-
-<!-- ========== CONTACTOS SECTION ========== -->
-<div id="contactos" class="section">
-  <div class="search-section">
-    <div class="search-title">📇 DIRECTORY CONTACTOS</div>
-    <div class="search-box">
-      <input type="text" class="search-input" placeholder="Buscar contacto...">
-      <button class="search-btn">BUSCAR</button>
-    </div>
-  </div>
-</div>
-
-<!-- ========== SHOWS SECTION ========== -->
-<div id="shows" class="section">
-  <div class="search-section">
-    <div class="search-title">🎙️ SHOWS PORTFOLIO</div>
-    <div class="shows-list" style="flex-direction: column; gap: 20px;">
-      <div>
-        <h3 style="color:#00d4ff;">Alex Lucas Show</h3>
-        <p style="color:#8892b0;">Estaciones afiliadas: 45</p>
+  <header>
+    <div class="title-group">
+      <div class="badge">
+        <span class="pill-dot"></span>
+        Red Nacional MLC · Live Dashboard
       </div>
-      <div>
-        <h3 style="color:#ff3366;">Jimena Aguilar en Vivo</h3>
-        <p style="color:#8892b0;">Estaciones afiliadas: 64</p>
+      <div class="title">
+        <span class="icon">📻</span>
+        <span>MLC Radio Shows & Studio Center</span>
       </div>
-      <div>
-        <h3 style="color:#b829ff;">Myriam y Rocío Show</h3>
-        <p style="color:#8892b0;">Estaciones afiliadas: 50</p>
-      </div>
-      <div>
-        <h3 style="color:#ffaa00;">Los Jefes</h3>
-        <p style="color:#8892b0;">Estaciones afiliadas: 120+</p>
+      <p class="subtitle">
+        Overview de afiliadas, servicios y alertas operativas para la red nacional de MLC Media.
+      </p>
+      <div class="chip-row">
+        <span class="chip">3 shows sindicados</span>
+        <span class="chip">Red nacional de afiliadas</span>
+        <span class="chip">Studio Center · Imagen & Spots</span>
       </div>
     </div>
-  </div>
-</div>
+    <div>
+      <span class="tag">Última actualización: Feb 2026</span>
+    </div>
+  </header>
 
-<!-- ========== STUDIO CENTER ========== -->
-<div id="studio" class="section">
-  <div class="search-section">
-    <div class="search-title">🎬 MLC STUDIO CENTER</div>
-    <p style="color:#8892b0;">163 Clientes activos · Revenue confirmado</p>
-  </div>
-</div>
+  <main class="app-shell">
+    <section>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span class="icon">📊</span>
+              <span>Network Overview</span>
+            </div>
+            <p class="card-meta">Radar rápido de shows y servicios activos en la red.</p>
+          </div>
+          <div class="status-chip">
+            <span class="led led-live"></span>
+            <span>Red operando en vivo</span>
+          </div>
+        </div>
 
-</div>
+        <div class="grid-3">
+          <div class="stat-pill">
+            <span class="label">Shows Sindicados</span>
+            <span class="value">3</span>
+            <span class="caption">Activos en red nacional</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Jimena Aguilar en Vivo</span>
+            <span class="value">64</span>
+            <span class="caption">Estaciones afiliadas</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Myriam y Rocío Show</span>
+            <span class="value">50</span>
+            <span class="caption">Estaciones afiliadas</span>
+          </div>
+        </div>
 
-<script>
-// =============================================
-// DATA - Actualizado con los nuevos shows
-// =============================================
-const stationsData = [
-  // KTIB-AM - New Orleans
-  { call: "KTIB-AM", market: "New Orleans", state: "LA", contact: "Amanda Sifuentes", 
-    shows: ["jimena", "jefes"], type: "afiliada" },
-  
-  // WLIM-AM
-  { call: "WLIM-AM", market: "Long Island", state: "NY", contact: "Ana Maria Carballo", 
-    shows: ["jimena", "jefes"], type: "afiliada" },
-  
-  // WNMA-AM - Miami
-  { call: "WNMA-AM", market: "Miami", state: "FL", contact: "Adrian Pontes", 
-    shows: ["jimena", "jefes", "tunes"], type: "afiliada" },
-  
-  // KMTL-AM - Little Rock
-  { call: "KMTL-AM", market: "Little Rock", state: "AR", contact: "Albino Gutierrez", 
-    shows: ["alex", "jefes", "tunes"], type: "afiliada" },
-  
-  // KBFW-FM
-  { call: "KBFW-FM", market: "McAllen", state: "TX", contact: "Carlos Martinez", 
-    shows: ["jimena"], type: "afiliada" },
-  
-  // KBQF-FM
-  { call: "KBQF-FM", market: "Wichita", state: "KS", contact: "Maria Gonzalez", 
-    shows: ["jimena"], type: "afiliada" },
-  
-  // KCLS-HD3
-  { call: "KCLS-HD3", market: "Phoenix", state: "AZ", contact: "Robert Chen", 
-    shows: ["jimena"], type: "afiliada" },
-  
-  // KCXR-FM
-  { call: "KCXR-FM", market: "Tulsa", state: "OK", contact: "Patricia Lopez", 
-    shows: ["jimena"], type: "afiliada", studio: true },
-  
-  // KHMU-FM
-  { call: "KHMU-FM", market: "Seattle", state: "WA", contact: "James Wilson", 
-    shows: ["jimena", "myriam"], type: "afiliada" },
-  
-  // KGHD-FM
-  { call: "KGHD-FM", market: "Las Vegas", state: "NV", contact: "Elena Ramirez", 
-    shows: ["myriam"], type: "afiliada" },
-  
-  // KZIP-AM
-  { call: "KZIP-AM", market: "Amarillo", state: "TX", contact: "Victor Sanchez", 
-    shows: ["myriam"], type: "afiliada" },
-  
-  // KXLQ-AM
-  { call: "KXLQ-AM", market: "Los Angeles", state: "CA", contact: "Diana Torres", 
-    shows: ["jimena", "myriam"], type: "afiliada", studio: true },
-  
-  // KXTD-AM
-  { call: "KXTD-AM", market: "Oklahoma City", state: "OK", contact: "Fernando Gomez", 
-    shows: ["jimena"], type: "afiliada" },
-  
-  // WCCM-AM
-  { call: "WCCM-AM", market: "Boston", state: "MA", contact: "Stephanie Costa", 
-    shows: ["jimena"], type: "afiliada", studio: true, studioType: "cm" },
-  
-  // WQBA-AM
-  { call: "WQBA-AM", market: "Miami", state: "FL", contact: "Jorge Perez", 
-    shows: ["jimena", "myriam"], type: "afiliada" },
-  
-  // KALN-FM
-  { call: "KALN-FM", market: "Wichita Falls", state: "TX", contact: "Rosa Flores", 
-    shows: ["jimena", "myriam"], type: "afiliada", studio: true },
-  
-  // KAMA-AM
-  { call: "KAMA-AM", market: "El Paso", state: "TX", contact: "Luis Mendoza", 
-    shows: ["myriam"], type: "afiliada", studio: true },
-  
-  // KQKZ
-  { call: "KQKZ", market: "Bakersfield", state: "CA", contact: "Napo", 
-    shows: ["studio"], type: "studio", studioType: "cm", note: "Lotus Bakersfield" },
-  
-  // KXTS
-  { call: "KXTS", market: "San Antonio", state: "TX", contact: "Abel Quiñonez", 
-    shows: ["studio"], type: "studio", studioType: "cm", service: "imagen" }
-];
-
-// Add more stations from jimenaStations original array
-const jimenaOriginals = [
-  "KTAP-AM","KTFR-FM","KTOR-FM","KEGE-FM","KXEG-AM","KNNR-AM","KXJJ-AM",
-  "WDMG-AM","WDMN-FM","WKJR-AM","WLLN-AM","WLLQ-AM","WREV-AM","WRTG-AM",
-  "WSRP-AM","WSTL-AM","WSUX-AM","WTWB-AM","XADNW-FM","XHPOW-FM","KFLC-AM",
-  "KIQS-AM","KJJS-FM","KLAT-AM","KLKY-FM","KLLE-FM","KMNV-AM","KPQN-FM",
-  "KPQP-FM","KQBO-FM","KQHM-FM","KSSA-FM","KTIB-AM","KTNQ-AM","KVMX-FM",
-  "KXDP-FM","KYLI-FM","KYWW-AM","KZHM-FM","KZOI-AM","WCND-AM","WDCN-FM",
-  "WFAJ-FM","WGSF-AM","WGUE-AM","WKZX-FM","WLRT-AM","WRTO-AM","WTMY-AM",
-  "WTWD-AM","WWWK-FM","XRST-FM"
-];
-
-jimenaOriginals.forEach(call => {
-  if (!stationsData.some(s => s.call === call)) {
-    stationsData.push({
-      call: call,
-      market: "Various",
-      state: "US",
-      contact: "TBD",
-      shows: ["jimena"],
-      type: "afiliada"
-    });
-  }
-});
-
-// Add Myriam originals
-const myriamOriginals = [
-  "KRRS-AM","WZKB-FM","KZLY-FM","WURA-AM","WZHF-AM","KMRI-AM","KDYL-AM",
-  "WCSZ-AM","WKND-AM","WBIB-AM","WDMV-AM","XHMAX-FM","XHGS-FM","XHGML-FM",
-  "WSPA-FM","KMJV-FM","KRAY-FM","WFAX-AM","WHHW-AM","KZNB-AM","WOXL-H3",
-  "KSVN-FM","WHWN-FM","KLNO-H4","KXTN-AM","KISF-FM"
-];
-
-myriamOriginals.forEach(call => {
-  if (!stationsData.some(s => s.call === call)) {
-    stationsData.push({
-      call: call,
-      market: "Various",
-      state: "US",
-      contact: "TBD",
-      shows: ["myriam"],
-      type: "afiliada"
-    });
-  }
-});
-
-// Alex Lucas stations (simulated)
-const alexStations = [
-  "KABC-AM","WABC-AM","KGO-AM","WGN-AM","KIRO-AM","KRLD-AM","WBAP-AM",
-  "KTRH-AM","KOA-AM","KFI-AM","WOR-AM","KDKA-AM","WLS-AM","KMOX-AM"
-];
-
-alexStations.forEach((call, i) => {
-  stationsData.push({
-    call: call,
-    market: ["Chicago","Dallas","Houston","Denver","Atlanta","Seattle","Phoenix"][i % 7],
-    state: ["IL","TX","TX","CO","GA","WA","AZ"][i % 7],
-    contact: `Contact ${i+1}`,
-    shows: ["alex"],
-    type: "afiliada"
-  });
-});
-
-// Los Jefes stations (simulated)
-const jefesStations = [
-  "KJEF-FM","WJEF-AM","KJEF-AM","WJEF-FM","KJFE-FM","WJFE-AM","KJEF-HD2"
-];
-
-jefesStations.forEach((call, i) => {
-  stationsData.push({
-    call: call,
-    market: ["Dallas","Houston","Miami","Chicago","Los Angeles","Phoenix","New York"][i],
-    state: ["TX","TX","FL","IL","CA","AZ","NY"][i],
-    contact: `Jefe Contact ${i+1}`,
-    shows: ["jefes"],
-    type: "afiliada"
-  });
-});
-
-// Studio data from original
-const studioCalls = [
-  "KDLS","WSUX","WTTM","WWWK","WXQR","WZSP","XHWD","XRST",
-  "KALN","KAMA","KAMZ","KBBX","KBIM","KBMG","KBRO"
-];
-
-studioCalls.forEach((call, i) => {
-  if (!stationsData.some(s => s.call === call)) {
-    stationsData.push({
-      call: call,
-      market: ["Austin","Houston","Dallas","San Antonio","El Paso","McAllen","Laredo"][i % 7],
-      state: ["TX","TX","TX","TX","TX","TX","TX"][i % 7],
-      contact: `Studio Contact ${i+1}`,
-      shows: ["studio"],
-      type: "studio",
-      studioType: i % 3 === 0 ? "cm" : "ok"
-    });
-  }
-});
-
-// Global variables
-let currentFilter = 'all';
-let currentSearchTerm = '';
-
-// Render stations grid
-function renderStations() {
-  let filtered = stationsData;
-  
-  // Apply filter
-  if (currentFilter !== 'all') {
-    filtered = filtered.filter(s => s.shows.includes(currentFilter));
-  }
-  
-  // Apply search
-  if (currentSearchTerm) {
-    const term = currentSearchTerm.toLowerCase();
-    filtered = filtered.filter(s => 
-      s.call.toLowerCase().includes(term) ||
-      (s.market && s.market.toLowerCase().includes(term)) ||
-      (s.contact && s.contact.toLowerCase().includes(term)) ||
-      (s.state && s.state.toLowerCase().includes(term))
-    );
-  }
-  
-  // Update count
-  document.getElementById('searchResultsCount').innerHTML = `Mostrando <span>${filtered.length}</span> estaciones`;
-  
-  // Render grid
-  const grid = document.getElementById('stationsGrid');
-  grid.innerHTML = '';
-  
-  filtered.slice(0, 50).forEach(s => { // Limit to 50 for performance
-    const card = document.createElement('div');
-    card.className = 'station-card';
-    
-    const badges = s.shows.map(show => {
-      const showMap = {
-        'alex': 'ALEX LUCAS',
-        'jimena': 'JIMENA AGUILAR',
-        'myriam': 'MYRIAM & ROCÍO',
-        'jefes': 'LOS JEFES',
-        'tunes': 'MLC TUNES',
-        'studio': 'STUDIO CENTER'
-      };
-      const showClass = {
-        'alex': 'badge-alex',
-        'jimena': 'badge-jimena',
-        'myriam': 'badge-myriam',
-        'jefes': 'badge-jefes',
-        'tunes': 'badge-tunes',
-        'studio': 'badge-studio'
-      };
-      return `<span class="badge ${showClass[show] || 'badge-afiliada'}">${showMap[show] || show.toUpperCase()}</span>`;
-    }).join('');
-    
-    card.innerHTML = `
-      <div class="station-header">
-        <span class="station-call">${s.call}</span>
-        <span class="station-band">${s.call.split('-')[1] || 'AM/FM'}</span>
+        <div class="grid-3" style="margin-top:10px;">
+          <div class="stat-pill">
+            <span class="label">Doble Afiliación</span>
+            <span class="value">21</span>
+            <span class="caption">Estaciones en ambos shows</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Studio Center Activos</span>
+            <span class="value">163</span>
+            <span class="caption">Clientes con revenue</span>
+          </div>
+          <div class="stat-pill">
+            <span class="label">Base Total</span>
+            <span class="value">283</span>
+            <span class="caption">Registros en plataforma</span>
+          </div>
+        </div>
       </div>
-      <div class="station-location">
-        <i>📍</i> ${s.market || 'Various'} - ${s.state || 'US'}
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span class="icon">🎙️</span>
+              <span>Status de Shows en Red</span>
+            </div>
+            <p class="card-meta">Estado actual de la parrilla de programas sindicados.</p>
+          </div>
+          <span class="tag">EN VIVO · PENDIENTE</span>
+        </div>
+
+        <div class="shows-layout">
+          <div class="show-card ja">
+            <div class="show-header">
+              <div class="show-badge">JA</div>
+              <div class="show-title-block">
+                <h3>Jimena Aguilar en Vivo</h3>
+                <p>💙 Morning Show · Información · Comunidad</p>
+              </div>
+            </div>
+            <div class="show-stats">
+              <span class="pill-number">
+                <span class="n">64</span>
+                <span class="label">Estaciones</span>
+              </span>
+              <span class="pill-small">39 slot 3–4 hrs</span>
+              <span class="pill-small">17 slot 4 hrs</span>
+              <span class="pill-small">6 sin horario</span>
+            </div>
+            <div style="margin-top:6px;">
+              <span class="badge-status">
+                <span class="dot"></span>
+                EN VIVO
+              </span>
+            </div>
+          </div>
+
+          <div class="show-card mr">
+            <div class="show-header">
+              <div class="show-badge">M&amp;R</div>
+              <div class="show-title-block">
+                <h3>Myriam y Rocío Show</h3>
+                <p>💜 Dos talentos · Un solo show · Mujer Latina</p>
+              </div>
+            </div>
+            <div class="show-stats">
+              <span class="pill-number">
+                <span class="n">50</span>
+                <span class="label">Estaciones</span>
+              </span>
+              <span class="pill-small">21 doble afiliación</span>
+              <span class="pill-small">2 talentos · 1 show</span>
+            </div>
+            <div style="margin-top:6px;">
+              <span class="badge-status">
+                <span class="dot"></span>
+                EN VIVO
+              </span>
+            </div>
+          </div>
+
+          <div class="show-card cb">
+            <div class="show-header">
+              <div class="show-badge">CB</div>
+              <div class="show-title-block">
+                <h3>Chui Baby Show</h3>
+                <p>🟡 Lista de afiliadas pendiente</p>
+              </div>
+            </div>
+            <div class="show-stats">
+              <span class="pill-small">Estaciones · Mercados · Horario</span>
+            </div>
+            <div style="margin-top:6px;">
+              <span class="badge-status pending">
+                <span class="dot"></span>
+                PENDIENTE
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper" style="margin-top:12px;">
+          <div class="mini-title">Estaciones con Doble Afiliación · 21</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Callsign</th>
+                <th>Jimena</th>
+                <th>Myriam &amp; Rocío</th>
+              </tr>
+            </thead>
+            <tbody id="double-affiliates-body">
+              <tr>
+                <td colspan="3" style="text-align:center;color:#6b7280;">
+                  Por cargar detalle de estaciones (doble revenue).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="mini-title">Red de Afiliadas</div>
+          <div class="map-placeholder">
+            <span>Placeholder de mapa · Integrar Mapbox / Leaflet o imagen de mapa maestro</span>
+            <div class="map-dot" style="top:45%;left:35%;"></div>
+            <div class="map-dot blue" style="top:30%;left:55%;"></div>
+            <div class="map-dot" style="top:65%;left:60%;"></div>
+          </div>
+          <div class="checkbox-row">
+            <label><input type="checkbox" checked /> Jimena Aguilar en Vivo</label>
+            <label><input type="checkbox" checked /> Myriam y Rocío</label>
+            <label><input type="checkbox" /> Chui Baby</label>
+          </div>
+        </div>
       </div>
-      <div class="station-contact">
-        <div class="contact-name">${s.contact || 'Contacto pendiente'}</div>
-        <div class="contact-role">${s.type === 'studio' ? 'Studio Client' : 'Station Contact'}</div>
+    </section>
+
+    <section class="col-right">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span class="icon">🎬</span>
+              <span>MLC Studio Center — Servicios</span>
+            </div>
+            <p class="card-meta">Clientes activos por tipo de servicio y oportunidades de upgrade.</p>
+          </div>
+          <span class="tag">Base auditada</span>
+        </div>
+
+        <div class="services-grid">
+          <div class="service-card">
+            <span class="service-label">Studio Center Activos</span>
+            <span class="service-value">134</span>
+            <span class="service-label">✅ Revisado OK · Revenue confirmado</span>
+          </div>
+          <div class="service-card secondary">
+            <span class="service-label">Producción Imagen</span>
+            <span class="service-value">146</span>
+            <span class="service-label">Clientes activos</span>
+          </div>
+          <div class="service-card secondary">
+            <span class="service-label">Producción Spots</span>
+            <span class="service-value">117</span>
+            <span class="service-label">Clientes activos</span>
+          </div>
+          <div class="service-card yellow">
+            <span class="service-label">CM Especial</span>
+            <span class="service-value">5</span>
+            <span class="service-label">Contratos especiales</span>
+          </div>
+          <div class="service-card yellow">
+            <span class="service-label">Solo Imagen</span>
+            <span class="service-value">12</span>
+            <span class="service-label">Clientes solo imagen</span>
+          </div>
+          <div class="service-card yellow">
+            <span class="service-label">Solo Spots</span>
+            <span class="service-value">4</span>
+            <span class="service-label">Clientes solo spots</span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <span class="badge-ghost">
+            ⬆️ 8 clientes con upgrade pendiente (Spots + Imagen): KDLS, WSUX, WTTM, WWWK, WXQR, WZSP, XHWD, XRST
+          </span>
+        </div>
+
+        <div class="table-wrapper" style="margin-top:12px;">
+          <div class="mini-title">Clientes Studio Center</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Callsign / Cliente</th>
+                <th>Servicio</th>
+                <th>Status</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody id="studio-center-body">
+              <tr>
+                <td colspan="4" style="text-align:center;color:#6b7280;">
+                  Lista detallada por cargar desde hoja de cálculo / CRM.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div class="station-badges">
-        ${badges}
-        ${s.type === 'afiliada' ? '<span class="badge badge-afiliada">MLC AFILIADA</span>' : ''}
-        ${s.studioType ? `<span class="badge badge-studio">${s.studioType === 'cm' ? '🔧 CM' : '✅ OK'}</span>` : ''}
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span class="icon">🔔</span>
+              <span>Centro de Alertas</span>
+            </div>
+            <p class="card-meta">Acciones prioritarias para mantener limpia la base y la red al día.</p>
+          </div>
+          <span class="tag">Acción requerida</span>
+        </div>
+
+        <div class="alerts-list">
+          <div class="alert-item ok">
+            <div class="alert-header">
+              <span class="alert-title">Jimena Aguilar en Vivo — 64 afiliadas confirmadas</span>
+              <span class="alert-tag">ACTUALIZADO</span>
+            </div>
+            <div class="alert-body">
+              Cargadas en sistema · 6 estaciones sin horario definido requieren seguimiento.
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Seguimiento horarios</span>
+              <small>Owner: Programación</small>
+            </div>
+          </div>
+
+          <div class="alert-item ok">
+            <div class="alert-header">
+              <span class="alert-title">Myriam y Rocío Show — 50 afiliadas confirmadas</span>
+              <span class="alert-tag">ACTUALIZADO</span>
+            </div>
+            <div class="alert-body">
+              2 talentos · 1 show · 21 estaciones comparten afiliación con Jimena (doble revenue).
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Cross-check doble afiliación</span>
+              <small>Owner: Ventas · Research</small>
+            </div>
+          </div>
+
+          <div class="alert-item pending">
+            <div class="alert-header">
+              <span class="alert-title">Chui Baby Show — Lista de afiliadas pendiente</span>
+              <span class="alert-tag">PENDIENTE</span>
+            </div>
+            <div class="alert-body">
+              En espera de lista de estaciones para carga en dashboard.
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Solicitar lista a afiliaciones</span>
+              <small>Owner: Afiliaciones</small>
+            </div>
+          </div>
+
+          <div class="alert-item ok">
+            <div class="alert-header">
+              <span class="alert-title">Studio Center — 134 clientes activos revisados</span>
+              <span class="alert-tag">AUDITADO</span>
+            </div>
+            <div class="alert-body">
+              Base auditada y categorizada · Revenue confirmado.
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Checklist completado</span>
+              <small>Owner: Admin · Finanzas</small>
+            </div>
+          </div>
+
+          <div class="alert-item pending">
+            <div class="alert-header">
+              <span class="alert-title">8 clientes con upgrade pendiente</span>
+              <span class="alert-tag">OPORTUNIDAD</span>
+            </div>
+            <div class="alert-body">
+              KDLS, WSUX, WTTM, WWWK, WXQR, WZSP, XHWD, XRST — revisar para migrar a Spots + Imagen.
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Pipeline ventas</span>
+              <small>Owner: Ventas</small>
+            </div>
+          </div>
+
+          <div class="alert-item">
+            <div class="alert-header">
+              <span class="alert-title">112 usuarios — Limpieza de base pendiente</span>
+              <span class="alert-tag">PENDIENTE</span>
+            </div>
+            <div class="alert-body">
+              Cancelaciones, cambios a inglés, fuera del aire — requieren eliminación del sistema.
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Depurar base</span>
+              <small>Owner: Data · Admin</small>
+            </div>
+          </div>
+
+          <div class="alert-item">
+            <div class="alert-header">
+              <span class="alert-title">3 usuarios sin acción definida</span>
+              <span class="alert-tag">REVISAR</span>
+            </div>
+            <div class="alert-body">
+              WEEF, WLEV, WPFT — revisar status y definir acción (reactivar, pausar o eliminar).
+            </div>
+            <div class="alert-meta">
+              <span class="alert-status">Definir siguiente paso</span>
+              <small>Owner: Estrategia</small>
+            </div>
+          </div>
+        </div>
       </div>
-    `;
-    grid.appendChild(card);
-  });
-  
-  if (filtered.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #8892b0;">No se encontraron estaciones</div>';
-  }
-}
+    </section>
+  </main>
 
-// Filter stations
-function filterStations(type, btn) {
-  currentFilter = type;
-  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderStations();
-}
-
-// Universal search
-function universalSearch() {
-  const searchInput = document.getElementById('universalSearch');
-  currentSearchTerm = searchInput.value;
-  renderStations();
-}
-
-// Navigation
-function showSection(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  
-  // Re-render if dashboard
-  if (id === 'dashboard') {
-    renderStations();
-  }
-}
-
-// Initial render
-renderStations();
-</script>
-</body>
-</html>
-```
-
-## 📌 **Principales actualizaciones realizadas:**
-
-### ✅ **Nuevo header con branding MLC MEDIA**
-- Logo MLC con gradiente rosa
-- Subtítulo "RADIO CONTACT & MARKET INTELLIGENCE"
-- Estadísticas: 502 estaciones, 290 contacts, 171 mercados, 900+ red MLC
-
-### ✅ **Información de usuario**
-- David Bello como Chief Network Officer
-- Email y teléfono visibles
-
-### ✅ **Búsqueda universal**
-- Busca por callsign, mercado, PD, owner, show
-- Filtrado en tiempo real
-
-### ✅ **Nuevos filtros por show**
-- TODOS, ALEX LUCAS, STUDIO, TUNES, JIMENA, MYRIAM & ROCÍO, LOS JEFES
-
-### ✅ **Tarjetas de estaciones mejoradas**
-- Callsign destacado
-- Ubicación con estado
-- Contacto asignado
-- Badges múltiples por show
-
-### ✅ **Sección de shows**
-- Alex Lucas Show (45 estaciones)
-- Jimena Aguilar en Vivo (64)
-- Myriam y Rocío Show (50)
-- Los Jefes (120+)
-
-### ✅ **Placeholder para mapa interactivo USA**
-- Preparado para futura integración de mapa geográfico
-
-## 🚀 **Próximos pasos sugeridos:**
-
-1. **Completar base de datos** con las 502 estaciones reales
-2. **Integrar mapa interactivo** (Google Maps o Leaflet)
-3. **Añadir fotos de contactos** a las tarjetas
-4. **Implementar exportación** de datos a CSV
-5
