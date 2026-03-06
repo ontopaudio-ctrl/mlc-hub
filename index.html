@@ -372,8 +372,28 @@ function badges(id,arr,color){
     const call=Array.isArray(s)?s[0]:(typeof s==='object'?s.c:s);
     const b=document.createElement('span');
     b.className='badge';
-    b.style.cssText=`color:${color};border-color:${color}55;font-size:10px;padding:2px 7px;cursor:default`;
-    b.textContent=call;el.appendChild(b);
+    b.style.cssText=`color:${color};border-color:${color}55;font-size:10px;padding:2px 7px;cursor:pointer;transition:all .15s`;
+    b.title='Click para ver en Contactos';
+    b.textContent=call;
+    b.onmouseenter=()=>{b.style.background=color+'33';b.style.transform='scale(1.05)';};
+    b.onmouseleave=()=>{b.style.background='';b.style.transform='';};
+    b.onclick=()=>{
+      go('contactos');
+      setTimeout(()=>{
+        const inp=document.getElementById('csearch');
+        inp.value=call;
+        cf='all';
+        document.querySelectorAll('#contactos .filter-btn').forEach(x=>x.classList.remove('on'));
+        document.querySelector('#contactos .filter-btn').classList.add('on');
+        fCon();
+        // Highlight matching row briefly
+        document.querySelectorAll('#ctbody tr:not(.hidden)').forEach(tr=>{
+          tr.style.background='rgba(255,107,53,.15)';
+          setTimeout(()=>tr.style.background='',1500);
+        });
+      },150);
+    };
+    el.appendChild(b);
   });
 }
 badges('jimena-st',jimena,'#00b4d8');
@@ -496,40 +516,97 @@ function fSt(f,btn){
 
 // MAP
 function initMap(){
-  const map=L.map('map',{center:[37.5,-96],zoom:4});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19
-  }).addTo(map);
+  // Full market data with correct MLC counts
+  const fullMarkets=[
+    {m:"Los Angeles",lat:34.05,lng:-118.24,mlc:20,total:57,leads:8},
+    {m:"New York",lat:40.71,lng:-74.01,mlc:5,total:26,leads:2},
+    {m:"Houston",lat:29.76,lng:-95.37,mlc:5,total:37,leads:4},
+    {m:"Miami",lat:25.77,lng:-80.19,mlc:5,total:27,leads:3},
+    {m:"Dallas",lat:32.78,lng:-96.80,mlc:5,total:32,leads:5},
+    {m:"Chicago",lat:41.88,lng:-87.63,mlc:3,total:13,leads:3},
+    {m:"San Francisco",lat:37.77,lng:-122.42,mlc:7,total:22,leads:2},
+    {m:"Phoenix",lat:33.45,lng:-112.07,mlc:6,total:23,leads:2},
+    {m:"San Antonio",lat:29.42,lng:-98.49,mlc:6,total:36,leads:5},
+    {m:"Sacramento",lat:38.58,lng:-121.49,mlc:8,total:25,leads:1},
+    {m:"Orlando",lat:28.54,lng:-81.38,mlc:4,total:24,leads:1},
+    {m:"McAllen",lat:26.20,lng:-98.23,mlc:4,total:33,leads:0},
+    {m:"Tampa",lat:27.95,lng:-82.46,mlc:9,total:17,leads:2},
+    {m:"Fresno",lat:36.74,lng:-119.77,mlc:11,total:26,leads:2},
+    {m:"Washington DC",lat:38.91,lng:-77.04,mlc:8,total:17,leads:1},
+    {m:"Philadelphia",lat:39.95,lng:-75.17,mlc:4,total:20,leads:1},
+    {m:"San Diego",lat:32.72,lng:-117.16,mlc:3,total:10,leads:2},
+    {m:"Denver",lat:39.74,lng:-104.98,mlc:11,total:22,leads:0},
+    {m:"Atlanta",lat:33.75,lng:-84.39,mlc:10,total:17,leads:0},
+    {m:"El Paso",lat:31.76,lng:-106.49,mlc:6,total:14,leads:0},
+    {m:"Albuquerque",lat:35.08,lng:-106.65,mlc:10,total:31,leads:0},
+    {m:"Austin",lat:30.27,lng:-97.74,mlc:3,total:15,leads:1},
+    {m:"Boston",lat:42.36,lng:-71.06,mlc:7,total:15,leads:2},
+    {m:"Las Vegas",lat:36.17,lng:-115.14,mlc:6,total:16,leads:0},
+    {m:"Seattle",lat:47.61,lng:-122.33,mlc:10,total:14,leads:0},
+    {m:"Bakersfield",lat:35.37,lng:-119.02,mlc:4,total:12,leads:1},
+    {m:"Riverside",lat:33.98,lng:-117.37,mlc:5,total:14,leads:1},
+    {m:"Portland",lat:45.52,lng:-122.68,mlc:3,total:10,leads:1},
+    {m:"Salt Lake City",lat:40.76,lng:-111.89,mlc:6,total:14,leads:0},
+    {m:"Oxnard-Ventura",lat:34.27,lng:-119.23,mlc:3,total:8,leads:1},
+    {m:"Monterey",lat:36.60,lng:-121.89,mlc:3,total:7,leads:0},
+    {m:"Nashville",lat:36.17,lng:-86.78,mlc:2,total:6,leads:1},
+    {m:"Tucson",lat:32.22,lng:-110.97,mlc:4,total:11,leads:0},
+    {m:"Tulsa",lat:36.15,lng:-95.99,mlc:3,total:7,leads:0},
+    {m:"Omaha",lat:41.26,lng:-95.94,mlc:2,total:6,leads:1},
+    {m:"St. Louis",lat:38.63,lng:-90.20,mlc:2,total:5,leads:0},
+    {m:"Sioux City",lat:42.50,lng:-96.40,mlc:1,total:3,leads:0},
+  ];
 
-  // Build contact index by market
-  const mkt={};
+  // Build hot lead directors index
+  const leadDirs={};
   contacts.forEach(c=>{
-    if(!c.market)return;
-    if(!mkt[c.market])mkt[c.market]={mlc:0,leads:0,dirs:[]};
-    if(c.is_mlc)mkt[c.market].mlc++;
-    else{mkt[c.market].leads++;if(c.director)mkt[c.market].dirs.push(c.director);}
+    if(!c.is_mlc && c.market && c.director){
+      if(!leadDirs[c.market]) leadDirs[c.market]=[];
+      leadDirs[c.market].push({name:c.director,phone:c.phone,call:c.callsign});
+    }
   });
 
-  mapData.forEach(d=>{
-    if(!d.lat||!d.lng)return;
-    const info=mkt[d.market]||{mlc:0,leads:0,dirs:[]};
-    const p=(d.mlc||info.mlc)/Math.max(d.total||1,1);
-    const color=p>=.5?'#27ae60':p>=.3?'#f5a623':p>=.15?'#ff6b35':'#e94560';
-    const r=7+Math.min((d.mlc||info.mlc),18)*1.1;
-    const circle=L.circleMarker([d.lat,d.lng],{
-      radius:r,fillColor:color,color:'rgba(255,255,255,.6)',
-      weight:1.5,opacity:.9,fillOpacity:.72
+  setTimeout(()=>{
+    const map=L.map('map',{center:[37.5,-96],zoom:4,preferCanvas:true});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© OpenStreetMap © CARTO',
+      subdomains:'abcd',maxZoom:19
     }).addTo(map);
-    const dirs=info.dirs.slice(0,3).map(n=>`<div style="font-size:11px;color:#ff6b35">🔥 ${n}</div>`).join('');
-    circle.bindPopup(`
-      <div style="font-family:Inter,sans-serif;min-width:190px;background:#111130;color:#e8edf5;padding:4px">
-        <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:${color}">${d.market}</div>
-        <div style="font-size:12px;margin-bottom:3px">✅ <b>${d.mlc}</b> afiliadas MLC</div>
-        <div style="font-size:12px;margin-bottom:3px">📊 <b>${d.total}</b> total español</div>
-        <div style="font-size:12px;margin-bottom:6px">📈 <b>${Math.round(p*100)}%</b> dominación</div>
-        ${info.leads>0?`<div style="font-size:12px;color:#ff6b35;font-weight:600;margin-bottom:4px">🔥 ${info.leads} hot leads</div>${dirs}`:'<div style="font-size:11px;color:#5a6a85">Sin hot leads registrados</div>'}
-      </div>`,{className:'dark-popup'});
-  });
+
+    fullMarkets.forEach(d=>{
+      const p=d.mlc/d.total;
+      const color=p>=.5?'#27ae60':p>=.3?'#f5a623':p>=.15?'#ff6b35':'#e94560';
+      const r=8+Math.min(d.mlc,20)*1.2;
+      const circle=L.circleMarker([d.lat,d.lng],{
+        radius:r,fillColor:color,color:'rgba(255,255,255,.5)',
+        weight:1.5,opacity:1,fillOpacity:.78,
+      }).addTo(map);
+
+      const dirs=(leadDirs[d.m]||[]).slice(0,4);
+      const dirsHTML=dirs.map(x=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-top:1px solid #1e2d45">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#ff6b35">${x.call}</div>
+            <div style="font-size:10px;color:#e8edf5">${x.name}</div>
+          </div>
+          ${x.phone?`<a href="tel:${x.phone}" style="font-size:10px;color:#27ae60;text-decoration:none;padding:2px 6px;border:1px solid #27ae6055;border-radius:10px">📞</a>`:''}
+        </div>`).join('');
+
+      circle.bindPopup(`
+        <div style="font-family:Inter,sans-serif;min-width:210px">
+          <div style="font-weight:800;font-size:14px;color:${color};margin-bottom:8px">${d.m}</div>
+          <div style="display:flex;gap:12px;margin-bottom:8px">
+            <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:#27ae60">${d.mlc}</div><div style="font-size:9px;color:#5a6a85">MLC</div></div>
+            <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:#e8edf5">${d.total}</div><div style="font-size:9px;color:#5a6a85">TOTAL</div></div>
+            <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:${color}">${Math.round(p*100)}%</div><div style="font-size:9px;color:#5a6a85">DOM.</div></div>
+            <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:#ff6b35">${d.leads}</div><div style="font-size:9px;color:#5a6a85">LEADS</div></div>
+          </div>
+          ${dirs.length>0?`<div style="font-size:10px;color:#5a6a85;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Hot Leads con Contacto</div>${dirsHTML}`:'<div style="font-size:11px;color:#5a6a85">Sin hot leads registrados</div>'}
+        </div>`,{className:'dark-popup',maxWidth:250});
+    });
+
+    map.invalidateSize();
+  },300);
 }
 
 // Custom popup style
